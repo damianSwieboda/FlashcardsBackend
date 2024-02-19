@@ -1,0 +1,64 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type DeckType {
+  id: ID!
+  deckOwner: ID!
+  name: String!
+  description: String
+  cards: [ID!]!
+}
+
+type TranslationType {
+  cardId: ID!
+  language: String!
+  word: String!
+  usageExample: String
+}
+
+type CardType {
+  _id: ID!
+  deckId: ID!
+  isOfficial: Boolean!
+  translations: [TranslationType!]!
+}
+
+type Query {
+  deck: DeckType!
+  getCards(cardsIds: [String!]!, languages: [String!]!): [CardType!]!
+}
+
+type Mutation {
+  createDeck(createDeckInput: CreateDeckInputDTO!): DeckType!
+  updateDeck(deckId: String!, updateDeckInput: UpdateDeckInputDTO!): DeckType!
+  createCard(createCardInput: CreateCardDTO!): CardType!
+  addTranslation(cardId: String!, translationInput: TranslationDTO!): TranslationType!
+  updateTranslation(cardId: String!, translationInput: TranslationDTO!): TranslationType!
+}
+
+input CreateDeckInputDTO {
+  name: String!
+  description: String!
+  firstLanguage: String!
+  secondLanguage: String!
+}
+
+input UpdateDeckInputDTO {
+  name: String!
+  description: String!
+  firstLanguage: String!
+  secondLanguage: String!
+}
+
+input CreateCardDTO {
+  deckId: String!
+  isOfficial: Boolean! = true
+  translations: [TranslationDTO!]!
+}
+
+input TranslationDTO {
+  language: String!
+  word: String!
+  usageExample: String!
+}
