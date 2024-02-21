@@ -39,16 +39,15 @@ type Mutation {
 
 input CreateDeckInputDTO {
   name: String!
-  description: String!
+  description: String
   firstLanguage: String!
   secondLanguage: String!
 }
 
 input UpdateDeckInputDTO {
-  name: String!
-  description: String!
-  firstLanguage: String!
-  secondLanguage: String!
+  name: String
+  description: String
+  cardId: String
 }
 
 input CreateCardDTO {

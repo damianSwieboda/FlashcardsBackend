@@ -19,9 +19,7 @@ export class UserService {
   }
 
   async deleteOne(_id: string) {
-    console.log(_id);
     const userDeleted = await this.userModel.findOneAndDelete({ _id }).exec();
-    console.log(userDeleted);
     if (!userDeleted) {
       throw 'Someting went wrong. Try again or contanct technical support.';
     }

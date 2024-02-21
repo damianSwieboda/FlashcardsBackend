@@ -1,5 +1,6 @@
 import { Schema, SchemaFactory, Prop } from '@nestjs/mongoose';
 import mongoose, { Date, Document } from 'mongoose';
+import { SupportedLanguages } from 'src/enums/suported-languages';
 
 export type DeckDocument = Deck & Document;
 
@@ -23,6 +24,20 @@ export class Deck {
     maxlength: 1000,
   })
   description: string;
+
+  @Prop({
+    required: true,
+    trim: true,
+    enum: SupportedLanguages,
+  })
+  firstLanguage: string;
+
+  @Prop({
+    required: true,
+    trim: true,
+    enum: SupportedLanguages,
+  })
+  secondLanguage: string;
 
   //todo: add maximum length for array, so app will not crash after reaching max data weight
   @Prop({

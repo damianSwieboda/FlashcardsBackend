@@ -33,7 +33,6 @@ export class UserController {
   @Delete()
   @UseGuards(AuthGuard)
   async deleteUser(@currentUser() currentUser: any, @Session() session: any) {
-    console.log(currentUser);
     const { _id } = currentUser;
     const userDeleted = await this.userService.deleteOne(_id);
     session.userId = null;

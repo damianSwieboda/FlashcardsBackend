@@ -1,7 +1,20 @@
-// import { PartialType, OmitType } from '@nestjs/swagger';
-import { CreateDeckInputDTO } from './create-deck-input.dto';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
+import { IsOptional, IsString } from 'class-validator';
 
-//  extends PartialType( OmitType(CreateDeckInputDTO, ['deckOwner'] as const) )
 @InputType()
-export class UpdateDeckInputDTO extends CreateDeckInputDTO {}
+export class UpdateDeckInputDTO {
+  @IsOptional()
+  @IsString()
+  @Field(() => String, { nullable: true })
+  readonly name?: string;
+
+  @IsOptional()
+  @IsString()
+  @Field(() => String, { nullable: true })
+  readonly description?: string;
+
+  @IsOptional()
+  @IsString()
+  @Field(() => String, { nullable: true })
+  readonly cardId?: string;
+}

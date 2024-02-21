@@ -13,8 +13,7 @@ async function bootstrap() {
   );
   app.use(
     cookieSession({
-      keys: ['asdsa'],
-      secret: '1234',
+      secret: process.env.SESSION_SECRET,
       saveUninitialized: true,
       resave: false,
     })

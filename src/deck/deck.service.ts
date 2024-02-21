@@ -10,8 +10,7 @@ export class DeckService {
   constructor(@InjectModel('Deck') private readonly deckModel: Model<DeckDocument>) {}
   async createDeck(deckOwner: string, createDeckInput: CreateDeckInputDTO): Promise<DeckDocument> {
     try {
-      const deck = new this.deckModel({ deckOwner, ...createDeckInput });
-      await deck.save();
+      const deck = await this.deckModel.create({ deckOwner, ...createDeckInput });
       return deck;
     } catch (error) {
       throw new Error('Failed to create deck');

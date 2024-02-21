@@ -12,23 +12,23 @@ import { SupportedLanguages } from 'src/enums/suported-languages';
 export class CreateDeckInputDTO {
   @IsNotEmpty()
   @IsString()
-  @Field()
+  @Field(() => String)
   readonly name: string;
 
-  @IsString()
   @IsOptional()
-  @Field()
-  readonly description: string;
+  @IsString()
+  @Field(() => String, { nullable: true })
+  readonly description?: string;
 
   @IsString()
   @IsIn(Object.values(SupportedLanguages), { message: 'Invalid first language' })
   @Field(() => String)
-  readonly firstLanguage: SupportedLanguages;
+  readonly firstLanguage: string;
 
   @IsString()
   @IsIn(Object.values(SupportedLanguages), { message: 'Invalid second language' })
   @Field(() => String)
-  readonly secondLanguage: SupportedLanguages;
+  readonly secondLanguage: string;
 
   // @IsOptional()
   // @Field()
