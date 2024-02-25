@@ -6,7 +6,6 @@
 2. [One liner](#one-liner)
 3. [Instalation](#instalation)
 4. [Running the app](#running-the-app)
-5. [Running the tests](#running-the-tests)
 6. [Running the tests](#running-the-tests)
 7. [Features](#features)
 8. [Sets and Cards logic](#features)
@@ -47,7 +46,7 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
-## Test
+## Running the tests
 
 ```bash
 # unit tests
@@ -59,6 +58,9 @@ $ npm run test:e2e
 # test coverage
 $ npm run test:cov
 ```
+
+## Features
+Currently, the only functionalities of the application consist of authorization, authentication, creating sets, cards and adding translations.
 
 ## Sets and Cards logic
 - They are two pools of cards - official cards, and cards created by users
