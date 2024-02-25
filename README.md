@@ -21,8 +21,9 @@
 This repository is my coding playground, where I explore and mix GraphQL and HTTP requests with NestJS - I undrestand using both of them simultaneously in the project is not the best approach from development perspective. While it's currently a learning space, I am serious about launching this app commercially in the future. I'm aware of my current gaps, but I see this project as both a recruitment showcase and a stepping stone in creating a cross-platform app based on NestJS and a monorepo of React and React Native for the frontend. This serves as a sketch or scaffolding for the long-term project that I will develop as an experienced developer
 
 Thank you for checking it out!
+
 Best regards,
-[Damian]
+Damian
 
 ## One liner
 This project is dedicated to offering users a seamless and efficient language learning platform. by integrating the finest features from industry-leading language apps, and introducing niche learning methods not yet digitalized by them.
