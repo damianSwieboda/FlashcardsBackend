@@ -95,4 +95,4 @@ french customer can learn: polish(10), spanish(11) and english(12)
 Work in progress, nothing here yet
 
 ## Stay in touch
-- Author Linkedin profile - [Damian Świeboda](www.linkedin.com/in/damian-świeboda](https://www.linkedin.com/in/damian-%C5%9Bwieboda/)https://www.linkedin.com/in/damian-%C5%9Bwieboda/)
+- Author Linkedin profile - [Damian Świeboda](https://www.linkedin.com/in/damian-%C5%9Bwieboda/)
