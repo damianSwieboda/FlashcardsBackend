@@ -1,5 +1,5 @@
 
-  <p align="center">Flashcards Backend with NestJS</p>
+  <h1 align="center">Flashcards Backend with NestJS</h1>
 
   ## Table of contents
 1. [Note to recruiters](#note-to-recruiters)
