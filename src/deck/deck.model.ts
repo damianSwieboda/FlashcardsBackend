@@ -1,6 +1,6 @@
 import { Schema, SchemaFactory, Prop } from '@nestjs/mongoose';
 import mongoose, { Date, Document } from 'mongoose';
-import { SupportedLanguages } from 'src/enums/suported-languages';
+import { LanguagesSupportedByGoogleTextTranslate } from 'src/enums/suported-languages';
 
 export type DeckDocument = Deck & Document;
 
@@ -15,6 +15,10 @@ export class Deck {
     minlength: 1,
     maxlength: 40,
     trim: true,
+    validate: {
+      validator: (value: string) => value.trim().length > 0,
+      message: 'Name cannot be empty.',
+    },
   })
   name: string;
 
@@ -28,14 +32,14 @@ export class Deck {
   @Prop({
     required: true,
     trim: true,
-    enum: SupportedLanguages,
+    enum: LanguagesSupportedByGoogleTextTranslate, // TODO: change to "supportedLanguages" once the final list is complete
   })
   firstLanguage: string;
 
   @Prop({
     required: true,
     trim: true,
-    enum: SupportedLanguages,
+    enum: LanguagesSupportedByGoogleTextTranslate, // TODO: change to "supportedLanguages" once the final list is complete
   })
   secondLanguage: string;
 

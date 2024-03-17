@@ -7,6 +7,7 @@ import { UserService } from '../user/user.service';
 export class CurrentUser implements NestInterceptor {
   constructor(private userService: UserService) {}
 
+  // todo: update, or get rid of this interceptor after implementing external auth provider
   async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
     const gqlContext = GqlExecutionContext.create(context);
     const { req } = gqlContext.getContext();

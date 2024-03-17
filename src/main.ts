@@ -3,6 +3,10 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const cookieSession = require('cookie-session');
+// import { GlobalExceptionFilter } from './http.exception-filter';
+
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,6 +24,8 @@ async function bootstrap() {
     })
   );
   app.enableCors({ credentials: true, origin: true });
+  // app.useGlobalFilters(new GlobalExceptionFilter());
+
   await app.listen(3000);
 }
 bootstrap();

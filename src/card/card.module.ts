@@ -13,5 +13,6 @@ import DeckSchema from 'src/deck/deck.model';
     ]),
   ],
   providers: [CardService, CardResolver],
+  exports: [CardService],
 })
 export class CardModule {}

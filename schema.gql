@@ -10,11 +10,17 @@ type DeckType {
   cards: [ID!]!
 }
 
-type TranslationType {
+type AddTranslationType {
   cardId: ID!
+  message: String!
+}
+
+type TranslationType {
   language: String!
   word: String!
   usageExample: String
+  translatedWord: String
+  translatedUsageExample: String
 }
 
 type CardType {
@@ -24,20 +30,40 @@ type CardType {
   translations: [TranslationType!]!
 }
 
+type UpdateTranslationType {
+  cardId: ID!
+  message: String!
+}
+
+type GenerateUsageExampleType {
+  usageExample: String!
+}
+
+type GenerateUsageExampleTranslationType {
+  translatedUsageExample: String!
+}
+
+type TranslateExpressionType {
+  translatedExpression: String!
+}
+
 type Query {
   deck: DeckType!
   getCards(cardsIds: [String!]!, languages: [String!]!): [CardType!]!
 }
 
 type Mutation {
-  createDeck(createDeckInput: CreateDeckInputDTO!): DeckType!
+  createDeck(createDeckInput: CreateDeckDTO!): DeckType!
   updateDeck(deckId: String!, updateDeckInput: UpdateDeckInputDTO!): DeckType!
   createCard(createCardInput: CreateCardDTO!): CardType!
-  addTranslation(cardId: String!, translationInput: TranslationDTO!): TranslationType!
-  updateTranslation(cardId: String!, translationInput: TranslationDTO!): TranslationType!
+  addTranslation(cardId: String!, addTranslationInput: AddTranslationDTO!): AddTranslationType!
+  updateTranslation(cardId: String!, updateTranslationInput: UpdateTranslationDTO!): UpdateTranslationType!
+  generateUsageExample(generateUsageExampleInput: GenerateUsageExampleDTO!): GenerateUsageExampleType!
+  generateUsageExampleTranslation(generateUsageExampleTranslationInput: GenerateUsageExampleTranslationDTO!): GenerateUsageExampleTranslationType!
+  translateExpression(cardId: String!, translateExpressionInput: TranslateExpressionDTO!): TranslateExpressionType!
 }
 
-input CreateDeckInputDTO {
+input CreateDeckDTO {
   name: String!
   description: String
   firstLanguage: String!
@@ -53,11 +79,35 @@ input UpdateDeckInputDTO {
 input CreateCardDTO {
   deckId: String!
   isOfficial: Boolean! = true
-  translations: [TranslationDTO!]!
+  translations: [AddTranslationDTO!]!
 }
 
-input TranslationDTO {
+input AddTranslationDTO {
   language: String!
   word: String!
-  usageExample: String!
+}
+
+input UpdateTranslationDTO {
+  language: String!
+  word: String
+  usageExample: String
+  translatedWord: String
+  translatedUsageExample: String
+}
+
+input GenerateUsageExampleDTO {
+  expression: String!
+  sourceLanguage: String!
+}
+
+input GenerateUsageExampleTranslationDTO {
+  usageExampleToTranslate: String!
+  sourceLanguage: String!
+  targetLanguage: String!
+}
+
+input TranslateExpressionDTO {
+  expressionToTranslate: String!
+  sourceLanguage: String!
+  targetLanguage: String!
 }

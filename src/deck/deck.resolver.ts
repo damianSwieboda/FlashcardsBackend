@@ -1,7 +1,7 @@
 import { Resolver, Mutation, Query, Args, Context } from '@nestjs/graphql';
-import { DeckType } from './gql-types/deck.type';
+import { DeckType } from './gql-types-inputs/deck.type';
 import { DeckService } from './deck.service';
-import { CreateDeckInputDTO, UpdateDeckInputDTO } from './dto';
+import { CreateDeckDTO, UpdateDeckInputDTO } from './dto';
 import { UseInterceptors } from '@nestjs/common';
 import { CurrentUser } from '../interceptors/current-user.interceptor';
 
@@ -20,7 +20,7 @@ export class DeckResolver {
   }
 
   @Mutation(() => DeckType)
-  createDeck(@Context() context, @Args('createDeckInput') createDeckInput: CreateDeckInputDTO) {
+  createDeck(@Context() context, @Args('createDeckInput') createDeckInput: CreateDeckDTO) {
     const deckOwner = context.currentUser;
     return this.deckService.createDeck(deckOwner, createDeckInput);
   }

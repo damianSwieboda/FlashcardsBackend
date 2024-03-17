@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty, IsBoolean, IsOptional } from 'class-validator';
 import { InputType, Field } from '@nestjs/graphql';
-import { TranslationDTO } from './translation.dto';
+import { AddTranslationDTO } from './index';
 
 @InputType()
 export class CreateCardDTO {
@@ -15,6 +15,6 @@ export class CreateCardDTO {
   readonly isOfficial: boolean = true;
 
   @IsNotEmpty()
-  @Field(() => [TranslationDTO]) // Specify the type explicitly here
-  translations: TranslationDTO[];
+  @Field(() => [AddTranslationDTO])
+  translations: AddTranslationDTO[];
 }

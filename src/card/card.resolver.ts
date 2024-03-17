@@ -2,10 +2,9 @@ import { Resolver, Mutation, Query, Args } from '@nestjs/graphql';
 import { CardService } from './card.service';
 import { UseInterceptors } from '@nestjs/common';
 import { CurrentUser } from 'src/interceptors/current-user.interceptor';
-import { CardType } from './gql-types/card.type';
 import { Card } from './card.model';
-import { CreateCardDTO, TranslationDTO } from './dto';
-import { TranslationType } from './gql-types/translation.type';
+import { AddTranslationDTO, CreateCardDTO, UpdateTranslationDTO } from './dto';
+import { AddTranslationType, CardType, UpdateTranslationType } from './gql-types-inputs';
 
 @UseInterceptors(CurrentUser)
 @Resolver(() => CardType)
@@ -27,24 +26,27 @@ export class CardResolver {
     return card;
   }
 
-  @Mutation(() => TranslationType)
+  @Mutation(() => AddTranslationType)
   async addTranslation(
     @Args('cardId', { type: () => String }) cardId: string,
-    @Args('translationInput') translationDTO: TranslationDTO
-  ) {
-    const translation = await this.cardService.addTranslation(cardId, translationDTO);
-    return { cardId, ...translation };
+    @Args('addTranslationInput') addTranslationDTO: AddTranslationDTO
+  ): Promise<AddTranslationType> {
+    const addedTranslationMessage = await this.cardService.addTranslation(
+      cardId,
+      addTranslationDTO
+    );
+    return { cardId, message: addedTranslationMessage };
   }
 
-  @Mutation(() => TranslationType)
+  @Mutation(() => UpdateTranslationType)
   async updateTranslation(
     @Args('cardId', { type: () => String }) cardId: string,
-    @Args('translationInput') translationDTO: TranslationDTO
-  ) {
-    const { updatedTranslation, message } = await this.cardService.updateTranslation(
+    @Args('updateTranslationInput') updatetranslationDTO: UpdateTranslationDTO
+  ): Promise<UpdateTranslationType> {
+    const updatedTranslationMessage = await this.cardService.updateTranslation(
       cardId,
-      translationDTO
+      updatetranslationDTO
     );
-    return { cardId, updatedTranslation, message };
+    return { cardId, message: updatedTranslationMessage };
   }
 }

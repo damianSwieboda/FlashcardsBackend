@@ -1,6 +1,6 @@
 import { Schema, SchemaFactory, Prop } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { SupportedLanguages } from 'src/enums/suported-languages';
+import { LanguagesSupportedByGoogleTextTranslate } from 'src/enums/suported-languages';
 
 export type CardDocument = Card & Document;
 
@@ -15,7 +15,7 @@ export class Card {
   @Prop({
     type: [
       {
-        language: { type: String, required: true, enum: SupportedLanguages },
+        language: { type: String, required: true, enum: LanguagesSupportedByGoogleTextTranslate },
         word: { type: String, required: true },
         usageExample: { type: String, required: false },
         _id: false,

@@ -6,10 +6,10 @@ import {
   // ValidateIf
 } from 'class-validator';
 import { InputType, Field } from '@nestjs/graphql';
-import { SupportedLanguages } from 'src/enums/suported-languages';
+import { LanguagesSupportedByGoogleTextTranslate } from 'src/enums/suported-languages';
 
 @InputType()
-export class CreateDeckInputDTO {
+export class CreateDeckDTO {
   @IsNotEmpty()
   @IsString()
   @Field(() => String)
@@ -21,12 +21,18 @@ export class CreateDeckInputDTO {
   readonly description?: string;
 
   @IsString()
-  @IsIn(Object.values(SupportedLanguages), { message: 'Invalid first language' })
+  @IsIn(Object.values(LanguagesSupportedByGoogleTextTranslate), {
+    // TODO: change to "supportedLanguages" once the final list is complete
+    message: 'Invalid first language',
+  })
   @Field(() => String)
   readonly firstLanguage: string;
 
   @IsString()
-  @IsIn(Object.values(SupportedLanguages), { message: 'Invalid second language' })
+  @IsIn(Object.values(LanguagesSupportedByGoogleTextTranslate), {
+    // TODO: change to "supportedLanguages" once the final list is complete
+    message: 'Invalid second language',
+  })
   @Field(() => String)
   readonly secondLanguage: string;
 
@@ -34,7 +40,7 @@ export class CreateDeckInputDTO {
   // @Field()
   // readonly image: Buffer;
 
-  // @ValidateIf((object: CreateDeckInputDTO) => object.image !== undefined) // TODO check if "object: createCardDTO" is this correct?
+  // @ValidateIf((object: CreateDeckDTO) => object.image !== undefined) // TODO check if "object: createCardDTO" is this correct?
   // @IsNotEmpty({
   //   message:
   //     'Something went wrong. MIME type of image must be provided. Please contact with Support, we will fix it as soon as possbile.',

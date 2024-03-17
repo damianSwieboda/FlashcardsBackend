@@ -1,2 +1,2 @@
-export * from './update-deck-input.dto';
-export * from './create-deck-input.dto';
+export * from './update-deck.dto';
+export * from './create-deck.dto';

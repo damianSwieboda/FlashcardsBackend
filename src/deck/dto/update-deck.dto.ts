@@ -1,10 +1,11 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 @InputType()
 export class UpdateDeckInputDTO {
   @IsOptional()
   @IsString()
+  @IsNotEmpty()
   @Field(() => String, { nullable: true })
   readonly name?: string;
 

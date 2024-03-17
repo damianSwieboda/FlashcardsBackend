@@ -3,6 +3,12 @@ import { getModelToken } from '@nestjs/mongoose';
 
 import { DeckService } from './deck.service';
 
+import {
+  NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
+
 describe('DeckService', () => {
   let service: DeckService;
 
@@ -69,11 +75,22 @@ describe('DeckService', () => {
 
   describe('updateDeck', () => {
     const deckId = '1234';
-    const updateDeckInput = {
+
+    const defaultUpdateDeckInput = {
       name: 'updated name',
       description: 'updated description',
       cardId: '12345',
     };
+
+    const updateDeckInputGenerator = (overrides?: Partial<typeof defaultUpdateDeckInput>) => {
+      return {
+        ...defaultUpdateDeckInput,
+        ...overrides,
+      };
+    };
+
+    const updateDeckInput = updateDeckInputGenerator();
+
     const mockUpdatedDeck = {
       _id: {
         $oid: '1234',
@@ -97,22 +114,37 @@ describe('DeckService', () => {
       );
     });
 
-    it('should throw an error if deck is not found', async () => {
-      const mockError = new Error('Deck not found');
+    // we don't check the content but the error instance type in the tests below
+    it('should throw NotFoundException when deck is not found', async () => {
+      const nonExistentDeckId = 'nonExistentDeckId';
 
-      mockDeckModel.findOneAndUpdate.mockResolvedValueOnce(null);
-
-      await expect(service.updateDeck(deckOwner, null, updateDeckInput)).rejects.toThrow(mockError);
+      await expect(
+        service.updateDeck(deckOwner, nonExistentDeckId, updateDeckInput)
+      ).rejects.toThrow(new NotFoundException(`Cannot update, deck not found`));
     });
 
-    // todo: consider upgrading error handling for recognizig, for example, why update fails
-    // todo: test to fix
-    it('should throw an error if update fails', async () => {
-      const mockError = new Error('Update failed');
+    it('should throw BadRequestException when invalid input is provided', async () => {
+      const invalidUpdateInput = updateDeckInputGenerator({ name: '' });
 
-      mockDeckModel.findOneAndUpdate.mockRejectedValueOnce(mockError);
+      mockDeckModel.findOneAndUpdate.mockImplementationOnce(() => {
+        throw {
+          name: 'ValidationError',
+        };
+      });
 
-      await expect(service.updateDeck(deckOwner, deckId, updateDeckInput)).rejects.toThrow(Error);
+      await expect(service.updateDeck(deckOwner, deckId, invalidUpdateInput)).rejects.toThrow(
+        BadRequestException
+      );
+    });
+
+    it('should throw InternalServerErrorException on unexpected error', async () => {
+      mockDeckModel.findOneAndUpdate.mockImplementationOnce(() => {
+        throw new Error();
+      });
+
+      await expect(service.updateDeck(deckOwner, deckId, updateDeckInput)).rejects.toThrow(
+        InternalServerErrorException
+      );
     });
   });
 });

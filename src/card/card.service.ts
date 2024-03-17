@@ -5,8 +5,8 @@ import mongoose, { Model } from 'mongoose';
 import { CardDocument } from './card.model';
 import { DeckDocument } from 'src/deck/deck.model';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
-import { TranslationDTO } from './dto/translation.dto';
 import { InjectConnection } from '@nestjs/mongoose';
+import { AddTranslationDTO, UpdateTranslationDTO } from './dto';
 
 @Injectable()
 export class CardService {
@@ -17,38 +17,30 @@ export class CardService {
   ) {}
 
   async getCards(cardIds: string[], languages: string[]) {
-    try {
-      const cards = await this.cardModel
-        .find({
-          _id: { $in: cardIds },
-        })
-        .select({
-          _id: 1,
-          isOfficial: 1,
-          deckId: 1,
-          translations: {
-            $filter: {
-              input: '$translations',
-              as: 'translation',
-              cond: { $in: ['$$translation.language', languages] },
-            },
+    const cards = await this.cardModel
+      .find({
+        _id: { $in: cardIds },
+      })
+      .select({
+        _id: 1,
+        isOfficial: 1,
+        deckId: 1,
+        translations: {
+          $filter: {
+            input: '$translations',
+            as: 'translation',
+            cond: { $in: ['$$translation.language', languages] },
           },
-        })
-        .exec();
+        },
+      })
+      .exec();
 
-      // TODO is that really an error? it is not if there is no cards in deck, but if user wants to get cards for another purpouse, that cards should be found
-      if (!cards) {
-        throw new NotFoundException('No cards found.');
-      }
-
-      return cards;
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      } else {
-        throw new Error('Unable to fetch cards, try again or contact support.');
-      }
+    // TODO is that really an error? it is not if there is no cards in deck, but if user wants to get cards for another purpouse, that cards should be found
+    if (!cards) {
+      throw new NotFoundException('No cards found.');
     }
+
+    return cards;
   }
 
   async createCard(createCardInput: CreateCardDTO) {
@@ -85,50 +77,43 @@ export class CardService {
     }
   }
 
-  async addTranslation(cardId: string, translationDTO: TranslationDTO) {
-    try {
-      const translation = await this.cardModel
-        .findOneAndUpdate(
-          { _id: cardId },
-          { $push: { translations: translationDTO } },
-          { new: true }
-        )
-        .select({
-          translations: {
-            $elemMatch: {
-              language: translationDTO.language,
-            },
+  async addTranslation(cardId: string, addTranslationDTO: AddTranslationDTO) {
+    const translation = await this.cardModel
+      .findOneAndUpdate(
+        { _id: cardId },
+        { $push: { translations: addTranslationDTO } },
+        { new: true }
+      )
+      .select({
+        translations: {
+          $elemMatch: {
+            language: addTranslationDTO.language,
           },
-        });
-      if (!translation) {
-        throw new NotFoundException('Card not found or unable to add translation.');
-      }
+        },
+      });
 
-      return translation;
-    } catch (error) {
-      throw new Error(`Error in adding translation: ${error.message}`);
+    if (!translation) {
+      throw new NotFoundException('Card not found or unable to add translation.');
     }
+
+    return 'Card updated successfully!';
   }
 
-  async updateTranslation(cardId: string, translationDTO: TranslationDTO) {
-    try {
-      const updatedTranslation = await this.cardModel.updateOne(
-        { _id: cardId, 'translations.language': translationDTO.language },
-        {
-          $set: {
-            'translations.$.word': translationDTO.word,
-            'translations.$.usageExample': translationDTO.usageExample,
-          },
-        }
-      );
-
-      if (updatedTranslation.modifiedCount > 0) {
-        return { updatedTranslation, message: 'Translation updated successfully!' };
-      } else {
-        throw new NotFoundException('Translation not found or not updated.');
+  async updateTranslation(cardId: string, updatetranslationDTO: UpdateTranslationDTO) {
+    const updatedTranslation = await this.cardModel.updateOne(
+      { _id: cardId, 'translations.language': updatetranslationDTO.language },
+      {
+        $set: {
+          'translations.$.word': updatetranslationDTO.word,
+          'translations.$.usageExample': updatetranslationDTO.usageExample,
+        },
       }
-    } catch (error) {
-      throw new Error('Unable to update translation.');
+    );
+
+    if (!updatedTranslation) {
+      throw new NotFoundException('Translation not found or not updated.');
     }
+
+    return 'Card text successfully updated!';
   }
 }
