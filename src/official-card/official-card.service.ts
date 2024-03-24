@@ -1,0 +1,208 @@
+import { Injectable, Inject } from '@nestjs/common';
+import { CreateOfficialCardDTO } from './dto/create-official-card.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import mongoose, { Model } from 'mongoose';
+import { OfficialCardDocument } from './official-card.model';
+import { DeckDocument } from 'src/deck/deck.model';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { InjectConnection } from '@nestjs/mongoose';
+import { AddTranslationDTO, UpdateTranslationDTO } from './dto';
+import { GoogleTranslateService } from 'src/google-translate/google-translate.service';
+import { OpenAiService } from 'src/openai/openai.service';
+import { LanguagesSupportedByGoogleTranslate } from 'src/enums/suported-languages';
+
+@Injectable()
+export class OfficialCardService {
+  constructor(
+    @InjectModel('OfficialCard') private readonly officialCardModel: Model<OfficialCardDocument>,
+    @InjectModel('Deck') private readonly deckModel: Model<DeckDocument>,
+    @InjectConnection() private readonly connection: mongoose.Connection,
+    @Inject(GoogleTranslateService) private readonly googleTranslateService: GoogleTranslateService,
+    @Inject(OpenAiService) private readonly openAiService: OpenAiService
+  ) {}
+
+  async getOfficialCards(officialCardIds: string[], languages: string[]) {
+    const officialCards = await this.officialCardModel
+      .find({
+        _id: { $in: officialCardIds },
+      })
+      .select({
+        _id: 1,
+        isOfficial: 1,
+        deckId: 1,
+        translations: {
+          $filter: {
+            input: '$translations',
+            as: 'translation',
+            cond: { $in: ['$$translation.language', languages] },
+          },
+        },
+      })
+      .exec();
+
+    // TODO is that really an error? it is not if there is no cards in deck, but if user wants to get cards for another purpouse, that cards should be found
+    if (officialCards.length === 0) {
+      throw new NotFoundException('No official cards found.');
+    }
+
+    return officialCards;
+  }
+
+  async createOfficialCard(createOfficialCardInput: CreateOfficialCardDTO) {
+    const session = await this.connection.startSession();
+    session.startTransaction();
+    try {
+      const officialCard = new this.officialCardModel(createOfficialCardInput);
+
+      const deck = await this.deckModel.findOneAndUpdate(
+        { _id: createOfficialCardInput.deckId },
+        { $push: { cards: officialCard._id } },
+        { new: true, session }
+      );
+      if (!deck) {
+        throw new NotFoundException('Cannot find your deck, try again or contact support');
+      }
+
+      await officialCard.save({ session });
+      await session.commitTransaction();
+      session.endSession();
+
+      return officialCard;
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+
+      if (error instanceof NotFoundException) {
+        throw error;
+      } else if (error.name === 'ValidationError') {
+        throw new BadRequestException('Validation error occurred.', error.message);
+      } else {
+        throw new Error(`Error in creating official card: ${error.message}`);
+      }
+    }
+  }
+
+  async addTranslation(officialCardId: string, addTranslationDTO: AddTranslationDTO) {
+    const translation = await this.officialCardModel
+      .findOneAndUpdate(
+        { _id: officialCardId },
+        { $push: { translations: addTranslationDTO } },
+        { new: true }
+      )
+      .select({
+        translations: {
+          $elemMatch: {
+            language: addTranslationDTO.language,
+          },
+        },
+      });
+
+    if (!translation) {
+      throw new NotFoundException('Official card not found or unable to add translation.');
+    }
+
+    return 'Official card updated successfully!';
+  }
+
+  async updateTranslation(officialCardId: string, updatetranslationDTO: UpdateTranslationDTO) {
+    const updatedTranslation = await this.officialCardModel.updateOne(
+      { _id: officialCardId, 'translations.language': updatetranslationDTO.language },
+      {
+        $set: {
+          'translations.$.expression': updatetranslationDTO?.expression,
+          'translations.$.usageExample': updatetranslationDTO?.usageExample,
+        },
+      }
+    );
+
+    if (!updatedTranslation) {
+      throw new NotFoundException('Translation not found or not updated.');
+    }
+
+    return 'Official card text successfully updated!';
+  }
+
+  async generateUsageExample(officialCardId: string) {
+    const [sourceCard] = await this.getOfficialCards([officialCardId], ['en']);
+    const sourceExpression = sourceCard.translations[0].expression;
+    if (!sourceExpression) throw new NotFoundException('Cannot find expression in fetched card');
+
+    const generatedUsageExample = await this.openAiService.generateUsageExample(sourceExpression);
+
+    const updateTranslationDTO: UpdateTranslationDTO = {
+      language: 'en',
+      usageExample: generatedUsageExample,
+    };
+
+    await this.updateTranslation(officialCardId, updateTranslationDTO);
+
+    return generatedUsageExample;
+  }
+
+  async generateExpressionTranslation(
+    officialCardId: string,
+    targetLanguage: LanguagesSupportedByGoogleTranslate
+  ) {
+    const [sourceCard] = await this.getOfficialCards([officialCardId], ['en']);
+    const sourceExpression = sourceCard.translations[0].expression;
+    if (!sourceExpression) throw new NotFoundException('Cannot find expression in fetched card');
+
+    const translatedExpression = await this.googleTranslateService.translateExpression(
+      sourceExpression,
+      'en',
+      targetLanguage
+    );
+
+    await this.addTranslation(officialCardId, {
+      language: targetLanguage,
+      expression: translatedExpression,
+    });
+
+    return translatedExpression;
+  }
+
+  async generateTranslatedUsageExample(
+    officialCardId: string,
+    targetLanguage: LanguagesSupportedByGoogleTranslate
+  ) {
+    const [sourceCard] = await this.getOfficialCards([officialCardId], ['en', targetLanguage]);
+    const sourceExpression = sourceCard.translations[0].expression;
+    const sourceUsageExample = sourceCard.translations[0].usageExample;
+    const translatedExpression = 'temporary translated expression stubed value'; //sourceCard.translations[1].expression; // searching for object by language?
+
+    if (!sourceExpression || !sourceUsageExample || !translatedExpression) {
+      throw new NotFoundException(
+        'Cannot find expression, or usage example, or translated expression in fetched card - they are required to generate translated usage example'
+      );
+    }
+
+    const generatedTranslatedUsageExample =
+      await this.openAiService.generateUsageExampleTranslation(
+        sourceExpression,
+        sourceUsageExample,
+        translatedExpression
+      );
+
+    const updateTranslationDTO: UpdateTranslationDTO = {
+      language: 'en',
+      usageExample: generatedTranslatedUsageExample,
+    };
+
+    await this.updateTranslation(officialCardId, updateTranslationDTO);
+
+    return generatedTranslatedUsageExample;
+  }
+}
+// async deleteTranslation(
+//   officialCardId: string,
+//   targetLanguage: LanguagesSupportedByGoogleTranslate
+// ) {
+//   return 'Translation deleted';
+// }
+
+// async deleteOfficialCard(
+//   officialCardId: string,
+//   targetLanguage: LanguagesSupportedByGoogleTranslate
+// ) {
+//   return 'Official card deleted';
+// }

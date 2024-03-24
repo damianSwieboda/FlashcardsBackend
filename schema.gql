@@ -6,108 +6,100 @@ type DeckType {
   id: ID!
   deckOwner: ID!
   name: String!
-  description: String
+  description: String!
   cards: [ID!]!
 }
 
 type AddTranslationType {
-  cardId: ID!
+  officialCardId: ID!
   message: String!
 }
 
 type TranslationType {
   language: String!
-  word: String!
-  usageExample: String
-  translatedWord: String
-  translatedUsageExample: String
+  expression: String!
+  usageExample: String!
 }
 
-type CardType {
+type OfficialCardType {
   _id: ID!
   deckId: ID!
-  isOfficial: Boolean!
   translations: [TranslationType!]!
 }
 
 type UpdateTranslationType {
-  cardId: ID!
+  officialCardId: ID!
   message: String!
 }
 
-type GenerateUsageExampleType {
-  usageExample: String!
-}
-
-type GenerateUsageExampleTranslationType {
-  translatedUsageExample: String!
-}
-
-type TranslateExpressionType {
+type GenerateExpressionTranslationType {
+  officialCardId: ID!
   translatedExpression: String!
+  targetLanguage: String!
+}
+
+type UserCardType {
+  _id: ID!
+  deckId: ID!
+  sourceLanguage: String!
+  targetLanguage: String!
+  expression: String!
+  usageExample: String!
+  translatedExpression: String!
+  translatedUsageExample: String!
 }
 
 type Query {
   deck: DeckType!
-  getCards(cardsIds: [String!]!, languages: [String!]!): [CardType!]!
+  getOfficialCards(officialCardIds: [String!]!, languages: [String!]!): [OfficialCardType!]!
+  getUserCards(userCardIds: [String!]!): [UserCardType!]!
 }
 
 type Mutation {
   createDeck(createDeckInput: CreateDeckDTO!): DeckType!
   updateDeck(deckId: String!, updateDeckInput: UpdateDeckInputDTO!): DeckType!
-  createCard(createCardInput: CreateCardDTO!): CardType!
-  addTranslation(cardId: String!, addTranslationInput: AddTranslationDTO!): AddTranslationType!
-  updateTranslation(cardId: String!, updateTranslationInput: UpdateTranslationDTO!): UpdateTranslationType!
-  generateUsageExample(generateUsageExampleInput: GenerateUsageExampleDTO!): GenerateUsageExampleType!
-  generateUsageExampleTranslation(generateUsageExampleTranslationInput: GenerateUsageExampleTranslationDTO!): GenerateUsageExampleTranslationType!
-  translateExpression(cardId: String!, translateExpressionInput: TranslateExpressionDTO!): TranslateExpressionType!
+  createOfficialCard(createOfficialCardInput: CreateOfficialCardDTO!): OfficialCardType!
+  addTranslation(officialCardId: String!, addTranslationInput: AddTranslationDTO!): AddTranslationType!
+  updateTranslation(officialCardId: String!, updateTranslationInput: UpdateTranslationDTO!): UpdateTranslationType!
+  generateExpressionTranslation(officialCardId: String!, targetLanguage: String!): GenerateExpressionTranslationType!
+  createUserCard(createUserCardInput: CreateUserCardDTO!): UserCardType!
 }
 
 input CreateDeckDTO {
   name: String!
-  description: String
+  description: String!
   firstLanguage: String!
   secondLanguage: String!
 }
 
 input UpdateDeckInputDTO {
-  name: String
-  description: String
-  cardId: String
+  name: String!
+  description: String!
+  cardId: String!
 }
 
-input CreateCardDTO {
+input CreateOfficialCardDTO {
   deckId: String!
-  isOfficial: Boolean! = true
   translations: [AddTranslationDTO!]!
 }
 
 input AddTranslationDTO {
   language: String!
-  word: String!
+  expression: String!
 }
 
 input UpdateTranslationDTO {
   language: String!
-  word: String
-  usageExample: String
-  translatedWord: String
-  translatedUsageExample: String
-}
-
-input GenerateUsageExampleDTO {
   expression: String!
-  sourceLanguage: String!
+  usageExample: String!
 }
 
-input GenerateUsageExampleTranslationDTO {
-  usageExampleToTranslate: String!
+input CreateUserCardDTO {
+  deckId: String!
   sourceLanguage: String!
   targetLanguage: String!
-}
-
-input TranslateExpressionDTO {
-  expressionToTranslate: String!
-  sourceLanguage: String!
-  targetLanguage: String!
+  expression: String!
+  usageExample: String!
+  translatedExpression: String!
+  translatedUsageExample: String!
 }

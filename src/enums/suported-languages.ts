@@ -5,7 +5,7 @@ export enum SupportedLanguages {
   GERMAN = 'german',
 }
 
-export enum LanguagesSupportedByGoogleTextTranslate {
+export enum LanguagesSupportedByGoogleTranslate {
   AFRIKAANS = 'af',
   ALBANIAN = 'sq',
   AMHARIC = 'am',
@@ -141,5 +141,3 @@ export enum LanguagesSupportedByGoogleTextTranslate {
   YORUBA = 'yo',
   ZULU = 'zu',
 }
-
-// export enum languagesSupportedByAWSTextTranslate {}

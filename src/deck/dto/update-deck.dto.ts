@@ -6,16 +6,16 @@ export class UpdateDeckInputDTO {
   @IsOptional()
   @IsString()
   @IsNotEmpty()
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   readonly name?: string;
 
   @IsOptional()
   @IsString()
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   readonly description?: string;
 
   @IsOptional()
   @IsString()
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   readonly cardId?: string;
 }

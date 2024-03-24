@@ -8,10 +8,10 @@ export class DeckType {
   @Field(() => ID)
   deckOwner: string;
 
-  @Field()
+  @Field(() => String)
   name: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   description?: string;
 
   @Field(() => [ID])

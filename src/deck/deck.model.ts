@@ -1,12 +1,17 @@
 import { Schema, SchemaFactory, Prop } from '@nestjs/mongoose';
 import mongoose, { Date, Document } from 'mongoose';
-import { LanguagesSupportedByGoogleTextTranslate } from 'src/enums/suported-languages';
+import { LanguagesSupportedByGoogleTranslate } from 'src/enums/suported-languages';
 
 export type DeckDocument = Deck & Document;
 
+// TODO: link to conversation with AI, about indexes, query efficiency and database structure,
+// in card model, in translation object we need to add "expressionAudioReference" and "usageExampleAudioReference",
+// in deck model, we need to add "level" property, it will be important durning quering and indexing audio. We will index audio documents like this: all audio docs  (300k of documents) > language (narrowed to 20k of docs) > level (narrowed to 3-4k of docs) > deck (narrowed to 100 docs) > audioDocumentID
+// https://chat.openai.com/c/5c1eb99f-62dd-49d5-96f3-e3fa0f42c8c8
+
 @Schema()
 export class Deck {
-  //todo change type to mongoose.Schema.Types.ObjectId
+  //TODO: change type to mongoose.Schema.Types.ObjectId
   @Prop()
   deckOwner: string;
 
@@ -32,14 +37,14 @@ export class Deck {
   @Prop({
     required: true,
     trim: true,
-    enum: LanguagesSupportedByGoogleTextTranslate, // TODO: change to "supportedLanguages" once the final list is complete
+    enum: LanguagesSupportedByGoogleTranslate, // TODO: change to "supportedLanguages" once the final list is complete
   })
   firstLanguage: string;
 
   @Prop({
     required: true,
     trim: true,
-    enum: LanguagesSupportedByGoogleTextTranslate, // TODO: change to "supportedLanguages" once the final list is complete
+    enum: LanguagesSupportedByGoogleTranslate, // TODO: change to "supportedLanguages" once the final list is complete
   })
   secondLanguage: string;
 
