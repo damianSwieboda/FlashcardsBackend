@@ -8,6 +8,6 @@ export class TranslationType {
   @Field({ nullable: false })
   expression: string;
 
-  @Field()
+  @Field({ nullable: true })
   usageExample?: string;
 }

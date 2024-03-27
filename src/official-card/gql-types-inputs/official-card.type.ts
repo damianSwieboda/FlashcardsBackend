@@ -9,6 +9,12 @@ export class OfficialCardType {
   @Field(() => ID)
   deckId: string;
 
+  @Field()
+  createdBy: string;
+
+  @Field()
+  cardStatus: string;
+
   @Field(() => [TranslationType])
-  translations?: TranslationType[];
+  translations: TranslationType[];
 }

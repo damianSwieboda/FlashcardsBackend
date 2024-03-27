@@ -17,7 +17,7 @@ async function bootstrap() {
   );
   app.use(
     cookieSession({
-      keys: ['asdsa'],
+      // keys: [''],
       secret: process.env.SESSION_SECRET,
       saveUninitialized: true,
       resave: false,

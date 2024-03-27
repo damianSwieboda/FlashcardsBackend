@@ -18,12 +18,14 @@ type AddTranslationType {
 type TranslationType {
   language: String!
   expression: String!
-  usageExample: String!
+  usageExample: String
 }
 
 type OfficialCardType {
   _id: ID!
   deckId: ID!
+  createdBy: String!
+  cardStatus: String!
   translations: [TranslationType!]!
 }
 
@@ -36,6 +38,16 @@ type GenerateExpressionTranslationType {
   officialCardId: ID!
   translatedExpression: String!
   targetLanguage: String!
+}
+
+type GenerateUsageExampleType {
+  officialCardId: ID!
+  usageExample: String!
+}
+
+type GenerateUsageExampleTranslationType {
+  officialCardId: ID!
+  usageExampleTranslation: String!
 }
 
 type UserCardType {
@@ -61,7 +73,9 @@ type Mutation {
   createOfficialCard(createOfficialCardInput: CreateOfficialCardDTO!): OfficialCardType!
   addTranslation(officialCardId: String!, addTranslationInput: AddTranslationDTO!): AddTranslationType!
   updateTranslation(officialCardId: String!, updateTranslationInput: UpdateTranslationDTO!): UpdateTranslationType!
+  generateUsageExample(officialCardId: String!): GenerateUsageExampleType!
   generateExpressionTranslation(officialCardId: String!, targetLanguage: String!): GenerateExpressionTranslationType!
+  generateUsageExampleTranslation(officialCardId: String!, targetLanguage: String!): GenerateUsageExampleTranslationType!
   createUserCard(createUserCardInput: CreateUserCardDTO!): UserCardType!
 }
 
@@ -90,8 +104,8 @@ input AddTranslationDTO {
 
 input UpdateTranslationDTO {
   language: String!
-  expression: String!
-  usageExample: String!
+  expression: String
+  usageExample: String
 }
 
 input CreateUserCardDTO {

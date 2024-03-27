@@ -34,9 +34,10 @@ import { GoogleTranslateModule } from './google-translate/google-translate.modul
       autoSchemaFile: 'schema.gql',
       context: ({ req, res }) => ({ req, res }),
       formatError: (err) => {
+        console.log(err);
         return {
           message: 'Somethin went wrong',
-          status: err.extensions.originalError || err.extensions.code,
+          status: err.message || err.extensions.code || err.extensions.originalError,
         };
       },
     }),

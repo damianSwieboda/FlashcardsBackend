@@ -10,6 +10,7 @@ import { AddTranslationDTO, UpdateTranslationDTO } from './dto';
 import { GoogleTranslateService } from 'src/google-translate/google-translate.service';
 import { OpenAiService } from 'src/openai/openai.service';
 import { LanguagesSupportedByGoogleTranslate } from 'src/enums/suported-languages';
+import getEnumKey from 'src/utils/getEnumKey';
 
 @Injectable()
 export class OfficialCardService {
@@ -28,7 +29,8 @@ export class OfficialCardService {
       })
       .select({
         _id: 1,
-        isOfficial: 1,
+        cardStatus: 1,
+        createdBy: 1,
         deckId: 1,
         translations: {
           $filter: {
@@ -59,6 +61,7 @@ export class OfficialCardService {
         { $push: { cards: officialCard._id } },
         { new: true, session }
       );
+
       if (!deck) {
         throw new NotFoundException('Cannot find your deck, try again or contact support');
       }
@@ -85,8 +88,16 @@ export class OfficialCardService {
   async addTranslation(officialCardId: string, addTranslationDTO: AddTranslationDTO) {
     const translation = await this.officialCardModel
       .findOneAndUpdate(
-        { _id: officialCardId },
-        { $push: { translations: addTranslationDTO } },
+        {
+          _id: officialCardId,
+          'translations.language': { $ne: addTranslationDTO.language }, // Check if language doesn't already exist
+        },
+        {
+          $addToSet: {
+            // Use $addToSet instead of $push to avoid duplicates
+            translations: addTranslationDTO,
+          },
+        },
         { new: true }
       )
       .select({
@@ -98,7 +109,9 @@ export class OfficialCardService {
       });
 
     if (!translation) {
-      throw new NotFoundException('Official card not found or unable to add translation.');
+      throw new NotFoundException(
+        'Unable to add translation, it already exist or cannot find official card.'
+      );
     }
 
     return 'Official card updated successfully!';
@@ -161,48 +174,73 @@ export class OfficialCardService {
     return translatedExpression;
   }
 
-  async generateTranslatedUsageExample(
+  async generateUsageExampleTranslationWithGoogleTranslate(
     officialCardId: string,
     targetLanguage: LanguagesSupportedByGoogleTranslate
   ) {
     const [sourceCard] = await this.getOfficialCards([officialCardId], ['en', targetLanguage]);
-    const sourceExpression = sourceCard.translations[0].expression;
-    const sourceUsageExample = sourceCard.translations[0].usageExample;
-    const translatedExpression = 'temporary translated expression stubed value'; //sourceCard.translations[1].expression; // searching for object by language?
+    const { usageExample } = sourceCard.translations.find((item) => item.language === 'en');
 
-    if (!sourceExpression || !sourceUsageExample || !translatedExpression) {
+    if (!usageExample) {
+      throw new NotFoundException(
+        'Cannot find english usage example in fetched card - it is required to generate translated usage example'
+      );
+    }
+
+    const generatedUsageExampleTranslation = await this.googleTranslateService.translateExpression(
+      usageExample,
+      'en',
+      targetLanguage
+    );
+
+    const updateTranslationDTO: UpdateTranslationDTO = {
+      language: targetLanguage,
+      usageExample: generatedUsageExampleTranslation,
+    };
+
+    await this.updateTranslation(officialCardId, updateTranslationDTO);
+
+    return generatedUsageExampleTranslation;
+  }
+
+  async generateUsageExampleTranslationWithOpenAI(
+    officialCardId: string,
+    targetLanguage: LanguagesSupportedByGoogleTranslate
+  ) {
+    const [sourceCard] = await this.getOfficialCards([officialCardId], ['en', targetLanguage]);
+    const { expression, usageExample } = sourceCard.translations.find(
+      (item) => item.language === 'en'
+    );
+    const targetLanguageExpression = sourceCard.translations.find(
+      (item) => item.language === targetLanguage
+    ).expression;
+
+    if (!expression || !usageExample || !targetLanguageExpression) {
       throw new NotFoundException(
         'Cannot find expression, or usage example, or translated expression in fetched card - they are required to generate translated usage example'
       );
     }
 
-    const generatedTranslatedUsageExample =
+    const targetLanguageFullName = getEnumKey(
+      targetLanguage,
+      LanguagesSupportedByGoogleTranslate
+    ).toLocaleLowerCase();
+
+    const generatedUsageExampleTranslation =
       await this.openAiService.generateUsageExampleTranslation(
-        sourceExpression,
-        sourceUsageExample,
-        translatedExpression
+        expression,
+        usageExample,
+        targetLanguageExpression,
+        targetLanguageFullName
       );
 
     const updateTranslationDTO: UpdateTranslationDTO = {
-      language: 'en',
-      usageExample: generatedTranslatedUsageExample,
+      language: targetLanguage,
+      usageExample: generatedUsageExampleTranslation,
     };
 
     await this.updateTranslation(officialCardId, updateTranslationDTO);
 
-    return generatedTranslatedUsageExample;
+    return generatedUsageExampleTranslation;
   }
 }
-// async deleteTranslation(
-//   officialCardId: string,
-//   targetLanguage: LanguagesSupportedByGoogleTranslate
-// ) {
-//   return 'Translation deleted';
-// }
-
-// async deleteOfficialCard(
-//   officialCardId: string,
-//   targetLanguage: LanguagesSupportedByGoogleTranslate
-// ) {
-//   return 'Official card deleted';
-// }

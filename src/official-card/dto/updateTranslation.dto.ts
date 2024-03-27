@@ -12,11 +12,11 @@ export class UpdateTranslationDTO {
   @IsOptional()
   @IsNotEmpty({ message: 'Expression once defined it cannot be changed to be empty.' })
   @IsString()
-  @Field()
+  @Field({ nullable: true })
   expression?: string;
 
   @IsOptional()
   @IsString()
-  @Field()
+  @Field({ nullable: true })
   usageExample?: string;
 }

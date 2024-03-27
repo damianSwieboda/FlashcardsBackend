@@ -11,6 +11,8 @@ import {
   GenerateExpressionTranslationType,
 } from './gql-types-inputs';
 import { LanguagesSupportedByGoogleTranslate } from 'src/enums/suported-languages';
+import { GenerateUsageExampleType } from './gql-types-inputs/generate-usage-example.type';
+import { GenerateUsageExampleTranslationType } from './gql-types-inputs/generate-usage-example-translation.type';
 
 @UseInterceptors(CurrentUser)
 @Resolver(() => OfficialCardType)
@@ -26,6 +28,7 @@ export class OfficialCardResolver {
       officialCardIds,
       languages
     );
+
     return officialCards;
   }
 
@@ -34,6 +37,7 @@ export class OfficialCardResolver {
     @Args('createOfficialCardInput') createOfficialCardDTO: CreateOfficialCardDTO
   ): Promise<OfficialCard> {
     const officialCard = await this.officialCardService.createOfficialCard(createOfficialCardDTO);
+
     return officialCard;
   }
 
@@ -52,13 +56,22 @@ export class OfficialCardResolver {
   @Mutation(() => UpdateTranslationType)
   async updateTranslation(
     @Args('officialCardId') officialCardId: string,
-    @Args('updateTranslationInput') updatetranslationDTO: UpdateTranslationDTO
+    @Args('updateTranslationInput') updatetranslationDTO: UpdateTranslationDTO // TODO: should we accept empty string from client? Or we should create another enpoint for it?
   ): Promise<UpdateTranslationType> {
     const updatedTranslationMessage = await this.officialCardService.updateTranslation(
       officialCardId,
       updatetranslationDTO
     );
     return { officialCardId, message: updatedTranslationMessage };
+  }
+
+  @Mutation(() => GenerateUsageExampleType)
+  async generateUsageExample(
+    @Args('officialCardId') officialCardId: string
+  ): Promise<GenerateUsageExampleType> {
+    const usageExample = await this.officialCardService.generateUsageExample(officialCardId);
+
+    return { officialCardId, usageExample };
   }
 
   @Mutation(() => GenerateExpressionTranslationType)
@@ -72,5 +85,19 @@ export class OfficialCardResolver {
     );
 
     return { officialCardId, translatedExpression, targetLanguage };
+  }
+
+  @Mutation(() => GenerateUsageExampleTranslationType)
+  async generateUsageExampleTranslation(
+    @Args('officialCardId') officialCardId: string,
+    @Args('targetLanguage') targetLanguage: LanguagesSupportedByGoogleTranslate
+  ) {
+    const usageExampleTranslation =
+      await this.officialCardService.generateUsageExampleTranslationWithOpenAI(
+        officialCardId,
+        targetLanguage
+      );
+
+    return { officialCardId, usageExampleTranslation };
   }
 }
