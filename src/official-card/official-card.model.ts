@@ -1,5 +1,6 @@
 import { Schema, SchemaFactory, Prop } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+
 import { CardStatuses } from 'src/enums/card-statuses';
 import { LanguagesSupportedByGoogleTranslate } from 'src/enums/suported-languages';
 

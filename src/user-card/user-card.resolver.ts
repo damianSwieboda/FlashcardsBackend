@@ -1,12 +1,11 @@
 import { Resolver, Mutation, Query, Args } from '@nestjs/graphql';
+
 import { UserCardService } from './user-card.service';
-import { UseInterceptors } from '@nestjs/common';
-import { CurrentUser } from 'src/interceptors/current-user.interceptor';
+// import { CurrentUser } from 'src/interceptors/current-user.interceptor';
 import { UserCard } from './user-card.model';
 import { CreateUserCardDTO } from './dto';
 import { UserCardType } from './gql-types-inputs';
 
-@UseInterceptors(CurrentUser)
 @Resolver(() => UserCardType)
 export class UserCardResolver {
   constructor(private userCardService: UserCardService) {}

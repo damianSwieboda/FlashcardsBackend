@@ -1,11 +1,10 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { CreateOfficialCardDTO } from './dto/create-official-card.dto';
-import { InjectModel } from '@nestjs/mongoose';
+import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import { InjectModel, InjectConnection } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
+
+import { CreateOfficialCardDTO } from './dto/create-official-card.dto';
 import { OfficialCardDocument } from './official-card.model';
-import { DeckDocument } from 'src/deck/deck.model';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/mongoose';
+import { OfficialDeckDocument } from 'src/official-deck/official-deck.model';
 import { AddTranslationDTO, UpdateTranslationDTO } from './dto';
 import { GoogleTranslateService } from 'src/google-translate/google-translate.service';
 import { OpenAiService } from 'src/openai/openai.service';
@@ -16,7 +15,7 @@ import getEnumKey from 'src/utils/getEnumKey';
 export class OfficialCardService {
   constructor(
     @InjectModel('OfficialCard') private readonly officialCardModel: Model<OfficialCardDocument>,
-    @InjectModel('Deck') private readonly deckModel: Model<DeckDocument>,
+    @InjectModel('OfficialDeck') private readonly officialDeckModel: Model<OfficialDeckDocument>,
     @InjectConnection() private readonly connection: mongoose.Connection,
     @Inject(GoogleTranslateService) private readonly googleTranslateService: GoogleTranslateService,
     @Inject(OpenAiService) private readonly openAiService: OpenAiService
@@ -56,7 +55,8 @@ export class OfficialCardService {
     try {
       const officialCard = new this.officialCardModel(createOfficialCardInput);
 
-      const deck = await this.deckModel.findOneAndUpdate(
+      // todo: should it be moved to offcial-deck? If yes, how to pass session to it?
+      const deck = await this.officialDeckModel.findOneAndUpdate(
         { _id: createOfficialCardInput.deckId },
         { $push: { cards: officialCard._id } },
         { new: true, session }

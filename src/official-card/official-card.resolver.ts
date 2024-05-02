@@ -1,8 +1,8 @@
+// TODO: Args in enpoints that dont have Gql input types, and DTOS, for example "generateUsageExample" endpoint, shoud they get their own one prop dtos and inputs? Or, we should keep it like it is? Its matter becouse of safety and data validation.
 import { Resolver, Mutation, Query, Args } from '@nestjs/graphql';
+
 import { OfficialCardService } from './official-card.service';
-import { UseInterceptors } from '@nestjs/common';
-import { CurrentUser } from 'src/interceptors/current-user.interceptor';
-import { OfficialCard } from './official-card.model';
+// import { OfficialCard } from './official-card.model';
 import { AddTranslationDTO, CreateOfficialCardDTO, UpdateTranslationDTO } from './dto';
 import {
   AddTranslationType,
@@ -11,10 +11,9 @@ import {
   GenerateExpressionTranslationType,
 } from './gql-types-inputs';
 import { LanguagesSupportedByGoogleTranslate } from 'src/enums/suported-languages';
-import { GenerateUsageExampleType } from './gql-types-inputs/generate-usage-example.type';
-import { GenerateUsageExampleTranslationType } from './gql-types-inputs/generate-usage-example-translation.type';
+import { GenerateUsageExampleType } from './gql-types-inputs';
+import { GenerateUsageExampleTranslationType } from './gql-types-inputs';
 
-@UseInterceptors(CurrentUser)
 @Resolver(() => OfficialCardType)
 export class OfficialCardResolver {
   constructor(private officialCardService: OfficialCardService) {}
@@ -23,7 +22,7 @@ export class OfficialCardResolver {
   async getOfficialCards(
     @Args('officialCardIds', { type: () => [String] }) officialCardIds: string[],
     @Args('languages', { type: () => [String] }) languages: string[]
-  ): Promise<OfficialCard[]> {
+  ): Promise<OfficialCardType[]> {
     const officialCards = await this.officialCardService.getOfficialCards(
       officialCardIds,
       languages
@@ -35,7 +34,7 @@ export class OfficialCardResolver {
   @Mutation(() => OfficialCardType)
   async createOfficialCard(
     @Args('createOfficialCardInput') createOfficialCardDTO: CreateOfficialCardDTO
-  ): Promise<OfficialCard> {
+  ): Promise<OfficialCardType> {
     const officialCard = await this.officialCardService.createOfficialCard(createOfficialCardDTO);
 
     return officialCard;

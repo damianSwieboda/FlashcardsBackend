@@ -2,17 +2,12 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type DeckType {
+type OfficialDeckType {
   id: ID!
   deckOwner: ID!
   name: String!
-  description: String!
+  description: String
   cards: [ID!]!
-}
-
-type AddTranslationType {
-  officialCardId: ID!
-  message: String!
 }
 
 type TranslationType {
@@ -29,6 +24,11 @@ type OfficialCardType {
   translations: [TranslationType!]!
 }
 
+type AddTranslationType {
+  officialCardId: ID!
+  message: String!
+}
+
 type UpdateTranslationType {
   officialCardId: ID!
   message: String!
@@ -40,14 +40,14 @@ type GenerateExpressionTranslationType {
   targetLanguage: String!
 }
 
-type GenerateUsageExampleType {
-  officialCardId: ID!
-  usageExample: String!
-}
-
 type GenerateUsageExampleTranslationType {
   officialCardId: ID!
   usageExampleTranslation: String!
+}
+
+type GenerateUsageExampleType {
+  officialCardId: ID!
+  usageExample: String!
 }
 
 type UserCardType {
@@ -62,14 +62,14 @@ type UserCardType {
 }
 
 type Query {
-  deck: DeckType!
+  findDeck(deckId: String!): OfficialDeckType!
   getOfficialCards(officialCardIds: [String!]!, languages: [String!]!): [OfficialCardType!]!
   getUserCards(userCardIds: [String!]!): [UserCardType!]!
 }
 
 type Mutation {
-  createDeck(createDeckInput: CreateDeckDTO!): DeckType!
-  updateDeck(deckId: String!, updateDeckInput: UpdateDeckInputDTO!): DeckType!
+  createDeck(createDeckInput: CreateOfficialDeckDTO!): OfficialDeckType!
+  updateDeck(deckId: String!, updateDeckInput: UpdateOfficialDeckDTO!): OfficialDeckType!
   createOfficialCard(createOfficialCardInput: CreateOfficialCardDTO!): OfficialCardType!
   addTranslation(officialCardId: String!, addTranslationInput: AddTranslationDTO!): AddTranslationType!
   updateTranslation(officialCardId: String!, updateTranslationInput: UpdateTranslationDTO!): UpdateTranslationType!
@@ -79,14 +79,12 @@ type Mutation {
   createUserCard(createUserCardInput: CreateUserCardDTO!): UserCardType!
 }
 
-input CreateDeckDTO {
+input CreateOfficialDeckDTO {
   name: String!
-  description: String!
-  firstLanguage: String!
-  secondLanguage: String!
+  description: String
 }
 
-input UpdateDeckInputDTO {
+input UpdateOfficialDeckDTO {
   name: String!
   description: String!
   cardId: String!

@@ -1,5 +1,6 @@
 import { Schema, SchemaFactory, Prop } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+
 import { CardStatuses } from 'src/enums/card-statuses'; // TODO: add and change to UserCardStatuses?
 import { PossibleCardCreators } from 'src/enums/possible-card-creators'; // TODO: hardcoded to User here, and App in app module? Only add prop for if was created with AI support?
 

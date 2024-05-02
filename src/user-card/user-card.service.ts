@@ -1,17 +1,16 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserCardDTO } from './dto/create-user-card.dto';
-import { InjectModel } from '@nestjs/mongoose';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { InjectModel, InjectConnection } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
+
+import { CreateUserCardDTO } from './dto/create-user-card.dto';
 import { UserCardDocument } from './user-card.model';
-import { DeckDocument } from 'src/deck/deck.model';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/mongoose';
+import { UserDeckDocument } from 'src/user-deck/user-deck.model';
 
 @Injectable()
 export class UserCardService {
   constructor(
     @InjectModel('UserCard') private readonly userCardModel: Model<UserCardDocument>,
-    @InjectModel('Deck') private readonly deckModel: Model<DeckDocument>,
+    @InjectModel('UserDeck') private readonly deckModel: Model<UserDeckDocument>,
     @InjectConnection() private readonly connection: mongoose.Connection
   ) {}
 

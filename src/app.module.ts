@@ -1,12 +1,9 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UserModule } from './user/user.module';
-import UserSchema from './user/user.model';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AuthModule } from './auth/auth.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { DeckModule } from './deck/deck.module';
+import { OfficialDeckModule } from './official-deck/official-deck.module';
 import { OfficialCardModule } from './official-card/official-card.module';
 import { UserCardModule } from './user-card/user-card.module';
 // import { HttpExceptionFilter } from './http.exception-filter';
@@ -28,7 +25,6 @@ import { GoogleTranslateModule } from './google-translate/google-translate.modul
       }),
       inject: [ConfigService],
     }),
-    MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: 'schema.gql',
@@ -41,9 +37,7 @@ import { GoogleTranslateModule } from './google-translate/google-translate.modul
         };
       },
     }),
-    UserModule,
-    AuthModule,
-    DeckModule,
+    OfficialDeckModule,
     OfficialCardModule,
     UserCardModule,
     OpenAiModule,
