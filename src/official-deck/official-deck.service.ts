@@ -11,30 +11,27 @@ export class OfficialDeckService {
     @InjectModel('OfficialDeck') private readonly officialDeckModel: Model<OfficialDeckDocument>
   ) {}
 
-  async findDeckById(deckId: string): Promise<OfficialDeckDocument> {
+  async findDeck(deckId: string): Promise<OfficialDeckDocument> {
     const deck = await this.officialDeckModel.findById(deckId);
+    console.log(deck);
+
     if (!deck) {
       throw new NotFoundException('Deck not found');
     }
+
     return deck;
   }
 
-  async createDeck(
-    deckOwner: string,
-    createDeckInput: CreateOfficialDeckDTO
-  ): Promise<OfficialDeckDocument> {
-    // delete deck owner for official deck?
-    const deck = await this.officialDeckModel.create({ deckOwner, ...createDeckInput });
+  async createDeck(createDeckInput: CreateOfficialDeckDTO): Promise<OfficialDeckDocument> {
+    const deck = await this.officialDeckModel.create(createDeckInput);
     return deck;
   }
 
   // update props without array of cards
-  async updateDeck(deckOwner: string, deckId: string, updateDeckInput: UpdateOfficialDeckDTO) {
-    const deck = await this.officialDeckModel.findOneAndUpdate(
-      { _id: deckId, deckOwner },
-      updateDeckInput,
-      { new: true }
-    );
+  async updateDeck(deckId: string, updateDeckInput: UpdateOfficialDeckDTO) {
+    const deck = await this.officialDeckModel.findOneAndUpdate({ _id: deckId }, updateDeckInput, {
+      new: true,
+    });
 
     if (!deck) {
       throw new NotFoundException(`Cannot update, deck not found`);

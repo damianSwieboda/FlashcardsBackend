@@ -1,18 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
+import { NotFoundException } from '@nestjs/common';
 
 import { OfficialDeckService } from './official-deck.service';
-
-import {
-  NotFoundException,
-  BadRequestException,
-  InternalServerErrorException,
-} from '@nestjs/common';
 
 describe('DeckService', () => {
   let service: OfficialDeckService;
 
-  const deckOwner = '123';
   const createDeckInput = {
     name: 'Testing deck',
     firstLanguage: 'polish',
@@ -22,6 +16,7 @@ describe('DeckService', () => {
   const mockDeckModel = {
     create: jest.fn(),
     findOneAndUpdate: jest.fn(),
+    findById: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -29,7 +24,7 @@ describe('DeckService', () => {
       providers: [
         OfficialDeckService,
         {
-          provide: getModelToken('Deck'),
+          provide: getModelToken('OfficialDeck'),
           useValue: mockDeckModel,
         },
       ],
@@ -42,25 +37,51 @@ describe('DeckService', () => {
     expect(service).toBeDefined();
   });
 
+  describe('findDeck', () => {
+    it('should return found deck', async () => {
+      const deckId = '123';
+
+      const mockFoundDeck = {
+        _id: '123',
+        name: 'Testing deck',
+        cards: [],
+        __v: 0,
+      };
+
+      mockDeckModel.findById.mockResolvedValueOnce(mockFoundDeck);
+      const result = await service.findDeck(deckId);
+
+      expect(result).toEqual(mockFoundDeck);
+      expect(mockDeckModel.findById).toHaveBeenCalledWith(deckId);
+    });
+
+    it('should throw NotFoundException when deck is not found', async () => {
+      const deckId = 'nonExisteningDeckId';
+
+      await expect(service.findDeck(deckId)).rejects.toThrow(
+        new NotFoundException('Deck not found')
+      );
+
+      expect(mockDeckModel.findById).toHaveBeenCalledWith(deckId);
+    });
+  });
+
   describe('createDeck', () => {
     it('should return successfully created deck', async () => {
       const mockCreatedDeck = {
         _id: {
           $oid: '123456789',
         },
-        deckOwner: '123',
         name: 'Testing deck',
-        firstLanguage: 'polish',
-        secondLanguage: 'english',
         cards: [],
         __v: 0,
       };
 
       mockDeckModel.create.mockResolvedValueOnce(mockCreatedDeck);
-      const result = await service.createDeck(deckOwner, createDeckInput);
+      const result = await service.createDeck(createDeckInput);
 
       expect(result).toEqual(mockCreatedDeck);
-      expect(mockDeckModel.create).toHaveBeenCalledWith({ deckOwner, ...createDeckInput });
+      expect(mockDeckModel.create).toHaveBeenCalledWith(createDeckInput);
     });
 
     it('should throw an error if create fails', async () => {
@@ -68,8 +89,8 @@ describe('DeckService', () => {
 
       mockDeckModel.create.mockRejectedValueOnce(mockError);
 
-      await expect(service.createDeck(deckOwner, createDeckInput)).rejects.toThrow(mockError);
-      expect(mockDeckModel.create).toHaveBeenCalledWith({ deckOwner, ...createDeckInput });
+      await expect(service.createDeck(createDeckInput)).rejects.toThrow(mockError);
+      expect(mockDeckModel.create).toHaveBeenCalledWith(createDeckInput);
     });
   });
 
@@ -77,8 +98,8 @@ describe('DeckService', () => {
     const deckId = '1234';
 
     const defaultUpdateDeckInput = {
-      name: 'updated name',
-      description: 'updated description',
+      name: 'some name',
+      description: 'some description',
       cardId: '12345',
     };
 
@@ -95,20 +116,19 @@ describe('DeckService', () => {
       _id: {
         $oid: '1234',
       },
-      deckOwner: '123',
-      name: 'updated name',
-      description: 'updated description',
+      name: 'some name',
+      description: 'some description',
       cards: ['12345'],
     };
 
     it('should return successfully updated deck', async () => {
       mockDeckModel.findOneAndUpdate.mockResolvedValueOnce(mockUpdatedDeck);
 
-      const result = await service.updateDeck(deckOwner, deckId, updateDeckInput);
+      const result = await service.updateDeck(deckId, updateDeckInput);
 
       expect(result).toEqual(mockUpdatedDeck);
       expect(mockDeckModel.findOneAndUpdate).toHaveBeenCalledWith(
-        { _id: deckId, deckOwner },
+        { _id: deckId },
         updateDeckInput,
         { new: true }
       );
@@ -116,34 +136,10 @@ describe('DeckService', () => {
 
     // we don't check the content but the error instance type in the tests below
     it('should throw NotFoundException when deck is not found', async () => {
-      const nonExistentDeckId = 'nonExistentDeckId';
+      const nonExisteningDeckId = 'nonExisteningDeckId';
 
-      await expect(
-        service.updateDeck(deckOwner, nonExistentDeckId, updateDeckInput)
-      ).rejects.toThrow(new NotFoundException(`Cannot update, deck not found`));
-    });
-
-    it('should throw BadRequestException when invalid input is provided', async () => {
-      const invalidUpdateInput = updateDeckInputGenerator({ name: '' });
-
-      mockDeckModel.findOneAndUpdate.mockImplementationOnce(() => {
-        throw {
-          name: 'ValidationError',
-        };
-      });
-
-      await expect(service.updateDeck(deckOwner, deckId, invalidUpdateInput)).rejects.toThrow(
-        BadRequestException
-      );
-    });
-
-    it('should throw InternalServerErrorException on unexpected error', async () => {
-      mockDeckModel.findOneAndUpdate.mockImplementationOnce(() => {
-        throw new Error();
-      });
-
-      await expect(service.updateDeck(deckOwner, deckId, updateDeckInput)).rejects.toThrow(
-        InternalServerErrorException
+      await expect(service.updateDeck(nonExisteningDeckId, updateDeckInput)).rejects.toThrow(
+        new NotFoundException(`Cannot update, deck not found`)
       );
     });
   });

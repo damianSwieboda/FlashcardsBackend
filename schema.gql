@@ -4,7 +4,7 @@
 
 type OfficialDeckType {
   id: ID!
-  deckOwner: ID!
+  deckOwner: ID
   name: String!
   description: String
   cards: [ID!]!
@@ -87,7 +87,6 @@ input CreateOfficialDeckDTO {
 input UpdateOfficialDeckDTO {
   name: String!
   description: String!
-  cardId: String!
 }
 
 input CreateOfficialCardDTO {

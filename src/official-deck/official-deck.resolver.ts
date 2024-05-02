@@ -1,4 +1,4 @@
-import { Resolver, Mutation, Query, Args, Context } from '@nestjs/graphql';
+import { Resolver, Mutation, Query, Args } from '@nestjs/graphql';
 
 import { OfficialDeckType } from './gql-types-inputs';
 import { OfficialDeckService } from './official-deck.service';
@@ -12,23 +12,20 @@ export class OfficialDeckResolver {
   @Query(() => OfficialDeckType)
   async findDeck(@Args('deckId') deckId: string) {
     // Call your service to fetch the deck by ID
-    return await this.officialDeckService.findDeckById(deckId);
+    return await this.officialDeckService.findDeck(deckId);
   }
 
   // @UseGuards(ClerkAuthGuard)
   @Mutation(() => OfficialDeckType)
-  createDeck(@Context() context, @Args('createDeckInput') createDeckInput: CreateOfficialDeckDTO) {
-    const deckOwner = context.currentUser;
-    return this.officialDeckService.createDeck(deckOwner, createDeckInput);
+  createDeck(@Args('createDeckInput') createDeckInput: CreateOfficialDeckDTO) {
+    return this.officialDeckService.createDeck(createDeckInput);
   }
 
   @Mutation(() => OfficialDeckType)
   updateDeck(
-    @Context() context,
     @Args('deckId') deckId: string,
     @Args('updateDeckInput') updateDeckInput: UpdateOfficialDeckDTO
   ) {
-    const deckOwner = context.currentUser;
-    return this.officialDeckService.updateDeck(deckOwner, deckId, updateDeckInput);
+    return this.officialDeckService.updateDeck(deckId, updateDeckInput);
   }
 }

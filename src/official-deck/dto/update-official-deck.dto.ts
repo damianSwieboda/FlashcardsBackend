@@ -13,9 +13,4 @@ export class UpdateOfficialDeckDTO {
   @IsString()
   @Field(() => String)
   readonly description?: string;
-
-  @IsOptional()
-  @IsString()
-  @Field(() => String)
-  readonly cardId?: string;
 }

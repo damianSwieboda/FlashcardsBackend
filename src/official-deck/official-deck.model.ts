@@ -7,13 +7,10 @@ import mongoose, { Date, Document } from 'mongoose';
 // https://chat.openai.com/c/5c1eb99f-62dd-49d5-96f3-e3fa0f42c8c8
 
 export type OfficialDeckDocument = OfficialDeck & Document;
+//TODO: change type to mongoose.Schema.Types.ObjectId
 
 @Schema()
 export class OfficialDeck {
-  //TODO: change type to mongoose.Schema.Types.ObjectId
-  @Prop()
-  deckOwner: string;
-
   @Prop({
     required: true,
     minlength: 1,
@@ -35,7 +32,7 @@ export class OfficialDeck {
 
   //todo: add maximum length for array, so app will not crash after reaching max data weight
   @Prop({
-    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Card' }],
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'OfficialCard' }],
     default: [],
   })
   cards: mongoose.Schema.Types.ObjectId[];

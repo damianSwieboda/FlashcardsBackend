@@ -5,7 +5,7 @@ export class OfficialDeckType {
   @Field(() => ID)
   id: string;
 
-  @Field(() => ID)
+  @Field(() => ID, { nullable: true })
   deckOwner: string;
 
   @Field(() => String)

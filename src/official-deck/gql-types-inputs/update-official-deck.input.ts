@@ -1,13 +1,16 @@
 import { ObjectType, Field } from '@nestjs/graphql';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 @ObjectType()
 export class UpdateOfficialDeckInput {
-  @Field(() => String)
-  name: string;
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  @Field(() => String, { nullable: true })
+  name?: string;
 
-  @Field(() => String)
+  @IsOptional()
+  @IsString()
+  @Field(() => String, { nullable: true })
   description?: string;
-
-  @Field()
-  cardId?: string;
 }
