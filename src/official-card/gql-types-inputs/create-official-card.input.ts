@@ -1,11 +1,11 @@
 import { ID, Field, InputType } from '@nestjs/graphql';
-import { TranslationType } from './translation.type';
+import { TranslationInput } from './translation.input';
 
 @InputType()
 export class CreateCardInput {
   @Field(() => ID, { nullable: false })
   deckId: string;
 
-  @Field(() => [TranslationType], { nullable: false })
-  translations?: TranslationType[];
+  @Field(() => [TranslationInput], { nullable: false })
+  translations?: TranslationInput[];
 }

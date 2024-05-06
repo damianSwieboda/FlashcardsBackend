@@ -11,6 +11,6 @@ export class TranslationInput {
   @Field()
   expression: string;
 
-  @Field()
+  @Field({ nullable: true })
   usageExample?: string;
 }

@@ -13,7 +13,6 @@ export class OfficialDeckService {
 
   async findDeck(deckId: string): Promise<OfficialDeckDocument> {
     const deck = await this.officialDeckModel.findById(deckId);
-    console.log(deck);
 
     if (!deck) {
       throw new NotFoundException('Deck not found');

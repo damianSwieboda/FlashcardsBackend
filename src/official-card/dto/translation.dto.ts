@@ -5,6 +5,7 @@ import { LanguagesSupportedByGoogleTranslate } from 'src/enums/suported-language
 @InputType()
 export class TranslationDTO {
   @IsEnum(LanguagesSupportedByGoogleTranslate) // TODO: change to "supportedLanguages" once the final list is complete
+  @IsString()
   @Field()
   language: string;
 
@@ -16,6 +17,6 @@ export class TranslationDTO {
   @IsOptional()
   @IsNotEmpty()
   @IsString()
-  @Field()
+  @Field({ nullable: true })
   usageExample?: string;
 }

@@ -4,7 +4,7 @@ import { NotFoundException } from '@nestjs/common';
 
 import { OfficialDeckService } from './official-deck.service';
 
-describe('DeckService', () => {
+describe('OfficialDeckService', () => {
   let service: OfficialDeckService;
 
   const createDeckInput = {
@@ -13,7 +13,7 @@ describe('DeckService', () => {
     secondLanguage: 'english',
   };
 
-  const mockDeckModel = {
+  const mockOfficialDeckModel = {
     create: jest.fn(),
     findOneAndUpdate: jest.fn(),
     findById: jest.fn(),
@@ -25,7 +25,7 @@ describe('DeckService', () => {
         OfficialDeckService,
         {
           provide: getModelToken('OfficialDeck'),
-          useValue: mockDeckModel,
+          useValue: mockOfficialDeckModel,
         },
       ],
     }).compile();
@@ -48,11 +48,11 @@ describe('DeckService', () => {
         __v: 0,
       };
 
-      mockDeckModel.findById.mockResolvedValueOnce(mockFoundDeck);
+      mockOfficialDeckModel.findById.mockResolvedValueOnce(mockFoundDeck);
       const result = await service.findDeck(deckId);
 
       expect(result).toEqual(mockFoundDeck);
-      expect(mockDeckModel.findById).toHaveBeenCalledWith(deckId);
+      expect(mockOfficialDeckModel.findById).toHaveBeenCalledWith(deckId);
     });
 
     it('should throw NotFoundException when deck is not found', async () => {
@@ -62,7 +62,7 @@ describe('DeckService', () => {
         new NotFoundException('Deck not found')
       );
 
-      expect(mockDeckModel.findById).toHaveBeenCalledWith(deckId);
+      expect(mockOfficialDeckModel.findById).toHaveBeenCalledWith(deckId);
     });
   });
 
@@ -77,20 +77,20 @@ describe('DeckService', () => {
         __v: 0,
       };
 
-      mockDeckModel.create.mockResolvedValueOnce(mockCreatedDeck);
+      mockOfficialDeckModel.create.mockResolvedValueOnce(mockCreatedDeck);
       const result = await service.createDeck(createDeckInput);
 
       expect(result).toEqual(mockCreatedDeck);
-      expect(mockDeckModel.create).toHaveBeenCalledWith(createDeckInput);
+      expect(mockOfficialDeckModel.create).toHaveBeenCalledWith(createDeckInput);
     });
 
     it('should throw an error if create fails', async () => {
       const mockError = new Error('Failed to create deck');
 
-      mockDeckModel.create.mockRejectedValueOnce(mockError);
+      mockOfficialDeckModel.create.mockRejectedValueOnce(mockError);
 
       await expect(service.createDeck(createDeckInput)).rejects.toThrow(mockError);
-      expect(mockDeckModel.create).toHaveBeenCalledWith(createDeckInput);
+      expect(mockOfficialDeckModel.create).toHaveBeenCalledWith(createDeckInput);
     });
   });
 
@@ -122,12 +122,12 @@ describe('DeckService', () => {
     };
 
     it('should return successfully updated deck', async () => {
-      mockDeckModel.findOneAndUpdate.mockResolvedValueOnce(mockUpdatedDeck);
+      mockOfficialDeckModel.findOneAndUpdate.mockResolvedValueOnce(mockUpdatedDeck);
 
       const result = await service.updateDeck(deckId, updateDeckInput);
 
       expect(result).toEqual(mockUpdatedDeck);
-      expect(mockDeckModel.findOneAndUpdate).toHaveBeenCalledWith(
+      expect(mockOfficialDeckModel.findOneAndUpdate).toHaveBeenCalledWith(
         { _id: deckId },
         updateDeckInput,
         { new: true }

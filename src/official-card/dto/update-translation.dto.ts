@@ -16,6 +16,7 @@ export class UpdateTranslationDTO {
   expression?: string;
 
   @IsOptional()
+  @IsNotEmpty()
   @IsString()
   @Field({ nullable: true })
   usageExample?: string;

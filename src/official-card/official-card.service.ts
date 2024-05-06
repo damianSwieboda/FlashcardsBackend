@@ -6,10 +6,11 @@ import { CreateOfficialCardDTO } from './dto/create-official-card.dto';
 import { OfficialCardDocument } from './official-card.model';
 import { OfficialDeckDocument } from 'src/official-deck/official-deck.model';
 import { AddTranslationDTO, UpdateTranslationDTO } from './dto';
-import { GoogleTranslateService } from 'src/google-translate/google-translate.service';
-import { OpenAiService } from 'src/openai/openai.service';
-import { LanguagesSupportedByGoogleTranslate } from 'src/enums/suported-languages';
-import getEnumKey from 'src/utils/getEnumKey';
+import { GoogleTranslateService } from '../google-translate/google-translate.service';
+// import { GoogleTranslateService } from 'src/google-translate/google-translate.service';
+import { OpenAiService } from '../openai/openai.service';
+import { LanguagesSupportedByGoogleTranslate } from '../enums/suported-languages';
+import getEnumKey from '../utils/getEnumKey';
 
 @Injectable()
 export class OfficialCardService {
@@ -29,7 +30,6 @@ export class OfficialCardService {
       .select({
         _id: 1,
         cardStatus: 1,
-        createdBy: 1,
         deckId: 1,
         translations: {
           $filter: {
@@ -53,9 +53,12 @@ export class OfficialCardService {
     const session = await this.connection.startSession();
     session.startTransaction();
     try {
-      const officialCard = new this.officialCardModel(createOfficialCardInput);
+      const officialCards = await this.officialCardModel.create([createOfficialCardInput], {
+        session,
+      });
 
-      // todo: should it be moved to offcial-deck? If yes, how to pass session to it?
+      const officialCard = officialCards[0];
+
       const deck = await this.officialDeckModel.findOneAndUpdate(
         { _id: createOfficialCardInput.deckId },
         { $push: { cards: officialCard._id } },
@@ -63,20 +66,24 @@ export class OfficialCardService {
       );
 
       if (!deck) {
+        await session.abortTransaction();
+        session.endSession();
         throw new NotFoundException('Cannot find your deck, try again or contact support');
       }
 
-      await officialCard.save({ session });
       await session.commitTransaction();
       session.endSession();
 
       return officialCard;
     } catch (error) {
-      await session.abortTransaction();
-      session.endSession();
+      if (session) {
+        await session.abortTransaction();
+        session.endSession();
+      }
 
       if (error instanceof NotFoundException) {
         throw error;
+        // error from database schema validation
       } else if (error.name === 'ValidationError') {
         throw new BadRequestException('Validation error occurred.', error.message);
       } else {

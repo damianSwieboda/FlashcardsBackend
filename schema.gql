@@ -19,7 +19,6 @@ type TranslationType {
 type OfficialCardType {
   _id: ID!
   deckId: ID!
-  createdBy: String!
   cardStatus: String!
   translations: [TranslationType!]!
 }
@@ -91,7 +90,13 @@ input UpdateOfficialDeckDTO {
 
 input CreateOfficialCardDTO {
   deckId: String!
-  translations: [AddTranslationDTO!]!
+  translations: TranslationDTO!
+}
+
+input TranslationDTO {
+  language: String!
+  expression: String!
+  usageExample: String
 }
 
 input AddTranslationDTO {

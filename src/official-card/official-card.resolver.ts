@@ -33,9 +33,9 @@ export class OfficialCardResolver {
 
   @Mutation(() => OfficialCardType)
   async createOfficialCard(
-    @Args('createOfficialCardInput') createOfficialCardDTO: CreateOfficialCardDTO
+    @Args('createOfficialCardInput') createOfficialCardInput: CreateOfficialCardDTO
   ): Promise<OfficialCardType> {
-    const officialCard = await this.officialCardService.createOfficialCard(createOfficialCardDTO);
+    const officialCard = await this.officialCardService.createOfficialCard(createOfficialCardInput);
 
     return officialCard;
   }
@@ -43,11 +43,11 @@ export class OfficialCardResolver {
   @Mutation(() => AddTranslationType)
   async addTranslation(
     @Args('officialCardId') officialCardId: string,
-    @Args('addTranslationInput') addTranslationDTO: AddTranslationDTO
+    @Args('addTranslationInput') addTranslationInput: AddTranslationDTO
   ): Promise<AddTranslationType> {
     const addedTranslationMessage = await this.officialCardService.addTranslation(
       officialCardId,
-      addTranslationDTO
+      addTranslationInput
     );
     return { officialCardId, message: addedTranslationMessage };
   }
@@ -55,11 +55,11 @@ export class OfficialCardResolver {
   @Mutation(() => UpdateTranslationType)
   async updateTranslation(
     @Args('officialCardId') officialCardId: string,
-    @Args('updateTranslationInput') updatetranslationDTO: UpdateTranslationDTO // TODO: should we accept empty string from client? Or we should create another enpoint for it?
+    @Args('updateTranslationInput') updatetranslationInput: UpdateTranslationDTO // TODO: should we accept empty string from client? Or we should create another enpoint for it?
   ): Promise<UpdateTranslationType> {
     const updatedTranslationMessage = await this.officialCardService.updateTranslation(
       officialCardId,
-      updatetranslationDTO
+      updatetranslationInput
     );
     return { officialCardId, message: updatedTranslationMessage };
   }

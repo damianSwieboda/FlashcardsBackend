@@ -19,12 +19,6 @@ export class OfficialCard {
 
   @Prop({
     required: true,
-    default: 'App',
-  })
-  createdBy: string;
-
-  @Prop({
-    required: true,
     enum: CardStatuses,
     default: 'Unfinished',
   })
