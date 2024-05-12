@@ -63,6 +63,10 @@ describe('OfficialCardService', () => {
     service = module.get<OfficialCardService>(OfficialCardService);
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
@@ -250,8 +254,52 @@ describe('OfficialCardService', () => {
       );
     });
   });
-  describe('generateUsageExample', () => {});
-  describe('generateExpressionTranslation', () => {});
-  describe('generateUsageExampleTranslationWithGoogleTranslate', () => {});
-  describe('generateUsageExampleTranslationWithOpenAI', () => {});
+  describe('generateUsageExample', () => {
+    const officialCardId = 'id1';
+
+    it('should generate a usage example and update the translation', async () => {
+      const sourceCard = {
+        _id: 'id1',
+        translations: [{ language: 'en', expression: 'test expression' }],
+      };
+      mockOfficialCardModel.find.mockReturnValueOnce({
+        select: jest.fn().mockReturnValueOnce({
+          exec: jest.fn().mockResolvedValueOnce([sourceCard]),
+        }),
+      });
+      mockOfficialCardModel.updateOne.mockResolvedValueOnce({ modifiedCount: 1 });
+
+      const generatedExample = 'test generated example';
+      const generateUsageExampleMock = jest.fn().mockResolvedValueOnce(generatedExample);
+      mockOpenAiService.generateUsageExample = generateUsageExampleMock;
+
+      const result = await service.generateUsageExample('id1'); // Pass 'id1' explicitly
+
+      expect(result).toEqual(generatedExample);
+      expect(mockOfficialCardModel.find).toHaveBeenCalledWith({ _id: { $in: [sourceCard._id] } });
+      expect(generateUsageExampleMock).toHaveBeenCalledWith('test expression');
+      expect(mockOfficialCardModel.updateOne).toHaveBeenCalledWith(
+        { _id: 'id1', 'translations.language': 'en' },
+        { $set: { 'translations.$.usageExample': generatedExample } },
+        expect.any(Object)
+      );
+    });
+
+    it('should throw NotFoundException if source expression is not found', async () => {
+      const sourceCard = { _id: officialCardId, translations: [{ language: 'en' }] };
+      mockOfficialCardModel.find.mockReturnValueOnce({
+        select: jest.fn().mockReturnValueOnce({
+          exec: jest.fn().mockResolvedValueOnce([sourceCard]),
+        }),
+      });
+
+      await expect(service.generateUsageExample(officialCardId)).rejects.toThrow(
+        new NotFoundException('Cannot find expression in fetched card')
+      );
+    });
+  });
 });
+
+// describe('generateExpressionTranslation', () => {});
+// describe('generateUsageExampleTranslationWithGoogleTranslate', () => {});
+// describe('generateUsageExampleTranslationWithOpenAI', () => {});
