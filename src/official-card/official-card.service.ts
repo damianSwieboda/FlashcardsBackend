@@ -92,54 +92,45 @@ export class OfficialCardService {
     }
   }
 
-  async addTranslation(officialCardId: string, addTranslationDTO: AddTranslationDTO) {
-    const translation = await this.officialCardModel
-      .findOneAndUpdate(
-        {
-          _id: officialCardId,
-          'translations.language': { $ne: addTranslationDTO.language }, // Check if language doesn't already exist
+  async addTranslation(officialCardId: string, addTranslationInput: AddTranslationDTO) {
+    const result = await this.officialCardModel.updateOne(
+      {
+        _id: officialCardId,
+        'translations.language': { $ne: addTranslationInput.language }, // Check if language doesn't already exist
+      },
+      {
+        $addToSet: {
+          // Use $addToSet instead of $push to avoid duplicates
+          translations: addTranslationInput,
         },
-        {
-          $addToSet: {
-            // Use $addToSet instead of $push to avoid duplicates
-            translations: addTranslationDTO,
-          },
-        },
-        { new: true }
-      )
-      .select({
-        translations: {
-          $elemMatch: {
-            language: addTranslationDTO.language,
-          },
-        },
-      });
+      },
+      { runValidators: true }
+    );
 
-    if (!translation) {
-      throw new NotFoundException(
-        'Unable to add translation, it already exist or cannot find official card.'
-      );
+    if (result.modifiedCount === 1) {
+      return 'Official card updated successfully!';
     }
-
-    return 'Official card updated successfully!';
+    throw new NotFoundException(
+      'Unable to add translation, cannot find official card, or translation already exist.'
+    );
   }
 
   async updateTranslation(officialCardId: string, updatetranslationDTO: UpdateTranslationDTO) {
-    const updatedTranslation = await this.officialCardModel.updateOne(
+    const result = await this.officialCardModel.updateOne(
       { _id: officialCardId, 'translations.language': updatetranslationDTO.language },
       {
         $set: {
           'translations.$.expression': updatetranslationDTO?.expression,
           'translations.$.usageExample': updatetranslationDTO?.usageExample,
         },
-      }
+      },
+      { runValidators: true }
     );
 
-    if (!updatedTranslation) {
-      throw new NotFoundException('Translation not found or not updated.');
+    if (result.modifiedCount === 1) {
+      return 'Official card text successfully updated!';
     }
-
-    return 'Official card text successfully updated!';
+    throw new NotFoundException('Cannot find translation to change');
   }
 
   async generateUsageExample(officialCardId: string) {

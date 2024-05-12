@@ -14,6 +14,7 @@ describe('OfficialCardService', () => {
     create: jest.fn(),
     find: jest.fn(),
     findOneAndUpdate: jest.fn(),
+    updateOne: jest.fn(),
   };
 
   const mockOfficialDeckModel = {
@@ -190,8 +191,65 @@ describe('OfficialCardService', () => {
     });
   });
 
-  describe('addTranslation', () => {});
-  describe('updateTranslation', () => {});
+  describe('addTranslation', () => {
+    const officialCardId = 'id1';
+    const addTranslationInput = {
+      language: 'es',
+      expression: 'someExpression',
+    };
+
+    it('should return string with positive message, when translation is successfully added', async () => {
+      const updateResult = {
+        modifiedCount: 1,
+      };
+
+      mockOfficialCardModel.updateOne.mockReturnValueOnce(updateResult);
+      const result = await service.addTranslation(officialCardId, addTranslationInput);
+      expect(result).toEqual('Official card updated successfully!');
+    });
+
+    it('should throw a NotFoundException error if the translation cannot be updated', () => {
+      const updateResult = {
+        modifiedCount: 0,
+      };
+
+      mockOfficialCardModel.updateOne.mockReturnValueOnce(updateResult);
+      expect(service.addTranslation(officialCardId, addTranslationInput)).rejects.toThrow(
+        new NotFoundException(
+          'Unable to add translation, cannot find official card, or translation already exist.'
+        )
+      );
+    });
+  });
+  describe('updateTranslation', () => {
+    const officialCardId = 'id1';
+    const updateTranslationInput = {
+      language: 'es',
+      expression: 'updatedExpression',
+      usageExample: 'updatedExample',
+    };
+
+    it('should return string with positive message, when translation is successfully updated', async () => {
+      const updateResult = {
+        modifiedCount: 1,
+      };
+
+      mockOfficialCardModel.updateOne.mockReturnValueOnce(updateResult);
+      const result = await service.updateTranslation(officialCardId, updateTranslationInput);
+      expect(result).toEqual('Official card text successfully updated!');
+    });
+
+    it('should throw a NotFoundException error if the translation cannot be updated', () => {
+      const updateResult = {
+        modifiedCount: 0,
+      };
+
+      mockOfficialCardModel.updateOne.mockReturnValueOnce(updateResult);
+      expect(service.updateTranslation(officialCardId, updateTranslationInput)).rejects.toThrow(
+        new NotFoundException('Cannot find translation to change')
+      );
+    });
+  });
   describe('generateUsageExample', () => {});
   describe('generateExpressionTranslation', () => {});
   describe('generateUsageExampleTranslationWithGoogleTranslate', () => {});
